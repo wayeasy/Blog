@@ -9,11 +9,13 @@ const cors = require('cors');
 // 引入路由文件
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var adminRouter = require('./routes/admin')
+var cateRouter = require('./routes/cate')
+var artRouter = require('./routes/article')
+var linkRouter = require('./routes/link')
 
 // 创建express实例
 var app = express();
-
-
 
 // view engine setup
 // 设置使用ejs模板引擎
@@ -31,6 +33,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 // 使用路由文件
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/admin', adminRouter)
+app.use('/cate', cateRouter)
+app.use('/article', artRouter)
+app.use('/link', linkRouter)
 
 // catch 404 and forward to error handler
 // 捕获异常和错误
