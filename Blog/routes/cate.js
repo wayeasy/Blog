@@ -47,6 +47,17 @@ router.get('/cateList', (req, res) => {
   }).skip(offset).limit(pagesize)
 })
 
+// 查询所有分类
+router.get('/allCateList', (req, res) => {
+  cateModel.find({}, (err, allCateList) => {
+    if (err) {
+      res.send({status: 0, message: err})
+    }
+    res.send({status: 1, message: "请求成功", data: allCateList, total: allCateList.length})
+  })
+})
+
+
 // 删除分类
 router.get('/deleteCate', (req, res) => {
   const id = req.query.id

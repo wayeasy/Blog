@@ -55,13 +55,26 @@
             <router-view></router-view>
           </div>
         </Card>
-        <div class="footer">博客</div>
+        <div class="footer">
+          <a href="http://www.miitbeian.gov.cn/">蜀ICP备19007188号</a>
+        </div>
       </Content>
     </Layout>
   </div>
 </template>
 <script>
 export default {
+  data () {
+    return {
+      menulList: [{
+        fatherMenu: '用户管理',
+        subMenu: [{
+          menuName: '用户列表',
+          name: 'UserList'
+        }]
+      }]
+    }
+  },
   methods: {
     selectMenu(name) {
       // console.log(name)
@@ -100,5 +113,8 @@ export default {
   text-align: center;
   line-height: 40px;
   margin-top: 20px;
+}
+a {
+  color: #515a6e;
 }
 </style>

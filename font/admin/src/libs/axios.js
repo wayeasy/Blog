@@ -1,5 +1,6 @@
 import axios from 'axios'
 import store from '@/store'
+// import Vue from 'vue'
 // import { Spin } from 'iview'
 const addErrorLog = errorInfo => {
   const { statusText, status, request: { responseURL } } = errorInfo
@@ -48,6 +49,7 @@ class HttpRequest {
     instance.interceptors.response.use(res => {
       this.destroy(url)
       const { data, status } = res
+      // console.log(data, status)
       return { data, status }
     }, error => {
       this.destroy(url)

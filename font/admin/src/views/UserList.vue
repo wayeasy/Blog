@@ -110,6 +110,10 @@ export default {
           key: "username"
         },
         {
+          title: "密码",
+          key: "password"
+        },
+        {
           title: "性别",
           key: "sex"
         },

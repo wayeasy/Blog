@@ -1,29 +1,32 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
+    <!-- <Layout></Layout> -->
+    <transition name="fade">
+      <router-view></router-view>
+    </transition>
   </div>
 </template>
+<script>
+import Layout from '@/views/Layout.vue'
+export default {
+  components: {
+    Layout
+  }
+}
+</script>
 
 <style lang="less">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+html, body {
+  // height: 100%;
+  // overflow: auto;
+  padding: 0;
+  margin: 0;
+  position: relative;
+  background: url('../public/b1.jpg') no-repeat  fixed ;
+  background-position: center center;
+  z-index: 4;
 }
-#nav {
-  padding: 30px;
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
+#app {
+  // height: 100%;
 }
 </style>

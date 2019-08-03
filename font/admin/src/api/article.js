@@ -22,6 +22,14 @@ export const getArtListApi = (params) => {
   })
 }
 
+// 查询所有分类
+export const getAllCateListApi = () => {
+  return axios.request({
+    url: '/cate/allCateList',
+    method: 'get'
+  })
+}
+
 // 根据ID删除文章
 export const deleteArticleApi = (id) => {
   let data = {}
@@ -30,6 +38,17 @@ export const deleteArticleApi = (id) => {
     url: '/article/deleteArticle',
     method: 'get',
     params: data
+  })
+}
+
+// 根据文章分类删除文章
+export const deleteArticleByCateApi = (cateId) => {
+  return axios.request({
+    url: '/article/deleteArticleByCate',
+    method: 'get',
+    params: {
+      cateId: cateId
+    }
   })
 }
 

@@ -10,7 +10,9 @@ let articleSchema = new mongoose.Schema({
   author: String,
   createDate: Date,
   imgSrc: String,
-  content: String
+  content: String,
+  artCate: String,
+  cateId: String
 })
 
 let artModel = mongoose.model('article', articleSchema, 'article')
@@ -34,13 +36,17 @@ let upload = multer({storage: storage})
 router.post('/addArticle', upload.single("file"),  (req, res) => {
   var fileInfo = req.file
   var filepath = fileInfo.path.toString().replace('public', '')
+  // console.log(333, req.body.artCate)
+  let artCate = JSON.parse(req.body.artCate)
   let artInfo = {}
   artInfo.artname = req.body.artname
   artInfo.author = req.body.author
   artInfo.createDate = new Date()
   artInfo.imgSrc = filepath
   artInfo.content = req.body.content
-
+  artInfo.artCate = req.body.artCate
+  artInfo.cateId = artCate._id
+  
   let artInstance = new artModel(artInfo)
   artInstance.save(err => {
     if (err) {
@@ -61,16 +67,20 @@ router.post('/articleImg', upload.single("file"), (req, res) => {
 router.get('/articleList', (req, res) => {
   let pageindex = parseInt(req.query.pageindex)
   let pagesize = parseInt(req.query.pagesize)
-  let keyword = req.query.keyword
   // 分页偏移量
   let offset = (pageindex - 1) * pagesize
+  let keyword = req.query.keyword
   keyword = new RegExp(keyword)
+  
   // 模糊查询多个字段并分页
   artModel.find({$or:[{"artname": keyword}, {content: keyword}, {author: keyword}]}, (err, artList) => {
     if (err) {
       res.send({status: 0, message: err})
     }
-    res.send({status: 1, message: "请求成功", data: artList, total: artList.length})
+    artModel.count({}, (err, count) => {
+      res.send({status: 1, message: "请求成功", data: artList, total: count})
+    })
+    
   }).skip(offset).limit(pagesize)
 })
 
@@ -87,6 +97,17 @@ router.get('/deleteArticle', (req, res) => {
   })
 })
 
+// 删除指定分类下的所有文章
+router.get('/deleteArticleByCate', (req, res) => {
+  const cateId = req.query.cateId
+  artModel.remove({cateId: cateId}, err => {
+    if (err) {
+      res.send({status: 0, message: err})
+    } 
+    res.send({status: 1, message: '删除成功'})
+  })
+})
+
 // 根据ID查询文章
 router.get('/searchArtById', (req, res) => {
   const id = req.query.id
@@ -98,6 +119,26 @@ router.get('/searchArtById', (req, res) => {
   })
 })
 
+// 查询分类下的所有文章
+router.get('/searchArtByCate', (req, res) => {
+  let pageindex = parseInt(req.query.pageindex)
+  let pagesize = parseInt(req.query.pagesize)
+  // 分页偏移量
+  let offset = (pageindex - 1) * pagesize
+
+  const cateId = req.query.cateId
+  artModel.find({cateId: cateId}, (err, artData) => {
+    if (err) {
+      res.send({status: 0, message: err})
+    }
+    artModel.count({cateId: cateId}, (err, count) => {
+      res.send({status: 1, message: "请求成功", data: artData, total: count})
+    })
+    // res.send({status: 1, message: '请求成功', data: artData, total: artData.length})
+  }).skip(offset).limit(pagesize)
+  
+})
+
 // 根据ID修改文章(没有修改文章封面)
 router.post('/updateArtById', (req, res) => {
   const id = req.body._id
@@ -105,7 +146,7 @@ router.post('/updateArtById', (req, res) => {
     artData.artname = req.body.artname
     artData.author = req.body.author
     artData.content = req.body.content
-    
+    artInfo.artCate = req.body.artCate
     artData.save(err => {
       if (err) {
         res.send({status: 0, message: err})
@@ -126,6 +167,7 @@ router.post('/updateArticle', upload.single("file"),  (req, res) => {
     artData.author = req.body.author
     artData.content = req.body.content
     artData.imgSrc = filepath
+    artData.artCate = req.body.artCate
     artData.save(err => {
       if (err) {
         res.send({status: 0, message: err})

@@ -6,6 +6,7 @@ import ArticleCate from './views/ArticleCate.vue'
 import ArticleList from './views/ArticleList.vue'
 import LinkList from './views/LinkList.vue'
 import Layout from './views/Layout.vue'
+import Login from './views/Login.vue'
 
 Vue.use(Router)
 
@@ -43,6 +44,11 @@ export default new Router({
         }
       ]
     },
+    {
+      path: '/login',
+      name: 'login',
+      component: Login
+    }
     // {
     //   path: '/about',
     //   name: 'about',

@@ -28,7 +28,7 @@
         <Drawer
           :title="drawerTitle"
           v-model="value3"
-          width="720"
+          width="920"
           :mask-closable="false"
           :styles="styles"
         >
@@ -45,22 +45,34 @@
                 </FormItem>
               </Col>
             </Row>
-            <FormItem label="文章封面">
-              <br>
-              <template>
-                <Upload
-                  :before-upload="handleBeforeUpload"
-                  type="drag"
-                  action="http://127.0.0.1:9000/addArticle">
-                  <div style="padding: 20px 0">
-                    <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>
-                    <p>拖拽或点击上传</p>
-                  </div>
-                </Upload>
-                <div v-if="file !== null">Upload file: {{ file.name }} 
-                </div>
-              </template>
-            </FormItem>
+            <Row :gutter="32">
+              <Col span="12">
+                <FormItem label="文章分类" label-position="top"><br>
+                  <Select v-model="formData.artCate" style="width:200px">
+                    <Option v-for="item in cateList" :value="item._id" :key="item._id">{{ item.catename }}</Option>
+                  </Select>
+                </FormItem>
+              </Col>
+              <Col span="12">
+                <FormItem label="文章封面" label-position="top">
+                <br>
+                  <template>
+                    <Upload
+                      :before-upload="handleBeforeUpload"
+                      type="drag"
+                      action="http://127.0.0.1:9000/addArticle">
+                      <div style="padding: 20px 0">
+                        <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>
+                        <p>拖拽或点击上传</p>
+                      </div>
+                    </Upload>
+                    <div v-if="file !== null">Upload file: {{ file.name }} 
+                    </div>
+                  </template>
+                </FormItem>
+              </Col>
+            </Row>
+            
             <FormItem label="文章内容" label-position="top">
               <br>
               <div class="toolbar" id="div1" style="border: 1px solid #ccc;"></div>
@@ -84,7 +96,8 @@ import {
   deleteArticleApi,
   getArtInfoByIdApi,
   updateArtByIdApi,
-  updateArticleApi
+  updateArticleApi,
+  getAllCateListApi
 } from "@/api/article";
 import moment from "moment";
 import E from 'wangeditor'
@@ -93,6 +106,7 @@ export default {
   mixins: [mixin],
   data() {
     return {
+      cateList: [],
       drawerTitle: "",
       value3: false,
       styles: {
@@ -104,7 +118,8 @@ export default {
       formData: {
         artname: "",
         author: "",
-        content: ""
+        content: "",
+        artCate: ""
       },
       keyword: "",
       pageindex: 1,
@@ -113,6 +128,10 @@ export default {
         {
           title: "文章标题",
           key: "artname"
+        },
+        {
+          title: "文章分类",
+          key: "artCate"
         },
         {
           title: "作者",
@@ -186,20 +205,34 @@ export default {
       ],
       data6: [],
       total: 0,
-
       file: null 
     }; 
   },
   created () {
     this.getArtList(1,10)
+    
+  },
+  mounted () {
+    this.getAllCateList()
   },
   methods: {
+    // 查询所有分类
+    getAllCateList() {
+      getAllCateListApi().then(res => {
+        // console.log(res.data)
+        const data = res.data
+        if (data.status) {
+          this.cateList = data.data
+        }
+      })
+    },
     // 点击新增按钮
     publishArticles() {
       this.value3 = true;
       this.drawerTitle = "发布文章";
       this.editor.txt.html(' ')
       this.$refs['formData'].resetFields();
+      this.formData.artCate = ''
     },
     handleSubmit(name) {
       this.$refs[name].validate(valid => {
@@ -235,6 +268,7 @@ export default {
                 "YYYY-MM-DD HH:mm"
               );
               item.content = item.content.substr(0, 120)
+              item.artCate = JSON.parse(item.artCate).catename
             }
           } else {
             this.$Notice.error({
@@ -248,22 +282,15 @@ export default {
     },
     // 点击编辑按钮
     edit(params) {
-      // console.log(params);
       this.drawerTitle = "编辑文章";
       this.value3 = true;
       getArtInfoByIdApi(params._id).then(res => {
         const data = res.data;
         if (data.status) {
-          // for (let item in data.data) {
-          //   if (item == "isEnable") {
-          //     data.data.isEnable == 1
-          //       ? (data.data.isEnable = true)
-          //       : (data.data.isEnable = false);
-          //   }
-          // }
+          data.data.artCate = JSON.parse(data.data.artCate)._id
+          console.log(data)
           this.formData = data.data;
           this.editor.txt.html(data.data.content)
-          console.log(this.formData, this.file)
         } else {
           this.$Notice.error({
             title: "请求失败!"
@@ -306,6 +333,17 @@ export default {
       formData.author = this.formData.author
       formData.content = this.editor.txt.html()
       formData._id = this.formData._id
+      let artCate = {}
+      for (let item of this.cateList) {
+        if (this.formData.artCate == item._id) {
+          artCate = {
+            _id: item._id,
+            catename: item.catename
+          }
+        }
+      }
+      formData.artCate = artCate
+      // formData
       updateArtByIdApi(formData).then(res => {
         const data = res.data;
         if (data.status) {
@@ -329,6 +367,16 @@ export default {
       formData.append('author', this.formData.author)
       formData.append('content', this.editor.txt.html())
       formData.append('id', this.formData._id)
+      let artCate = {}
+      for (let item of this.cateList) {
+        if (this.formData.artCate == item._id) {
+          artCate = {
+            _id: item._id,
+            catename: item.catename
+          }
+        }
+      }
+      formData.append('artCate', this.formData.artCate)
       updateArticleApi(formData).then(res => {
         const data = res.data
         if (data.status) {
@@ -357,12 +405,23 @@ export default {
       formData.append('artname', this.formData.artname)
       formData.append('author', this.formData.author)
       formData.append('content', this.editor.txt.html())
+      
       if (this.file == null) {
         this.$Notice.info({
           title: '必须上传文章封面'
         })
         return false
       }
+      let artCate = {}
+      for (let item of this.cateList) {
+        if (this.formData.artCate == item._id) {
+          artCate = {
+            _id: item._id,
+            catename: item.catename
+          }
+        }
+      }
+      formData.append('artCate', JSON.stringify(artCate))
       addArticleApi(formData).then(res => {
         // console.log(res.data)
         const data = res.data

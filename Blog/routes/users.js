@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose')
+const redis = require('redis')
+const client = redis.createClient('6379', '120.77.220.214');
 
 // 定义集合骨架
 const usersSchema = new mongoose.Schema({
@@ -76,6 +78,41 @@ router.get('/searchUserById', (req, res) => {
     res.send({status: 1, message: '请求成功', data: userData})
   })
 })
+
+// 判断用户是否登录
+router.post('/login', (req, res) => {
+  const username = req.body.username
+  const password = req.body.password
+  usersModel.find({"username": username, "password": password}, (err, userInfo) => {
+    if (err) {
+      res.send({status: 0, message: '请求失败'})
+    }
+    if (userInfo.length < 1) {
+      res.send({status: 0, message: '登录失败,请先注册'})
+    } else {
+      const user_token = userInfo[0]._id + new Date().getTime()
+      client.set(`user_token:${userInfo[0]._id}`, user_token, redis.print);
+      res.send({status: 1, message: '登录成功', user_token: user_token})
+    }
+    
+  })
+})
+
+// 判断用户名是否被注册
+router.get('/isReg', (req, res) => {
+  const username = req.query.username
+  usersModel.find({username: username}, (err, userLsit) => {
+    if (err) {
+      res.send({status: 0, message: err})
+    }
+    if (userLsit.length > 0) {
+      res.send({status: 2, message :'该用户名已被注册'})
+    } else {
+      res.send({status: 1, message :'该用户名未被注册'})
+    }
+  })
+})
+
 
 // 根据ID修改用户信息
 router.post('/updateUserById', (req, res) => {

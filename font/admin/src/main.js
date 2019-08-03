@@ -4,6 +4,7 @@ import router from './router'
 import store from './store'
 import iview from 'iview'
 import axios from 'axios'
+import '@/http/index'
 Vue.prototype.$axios = axios
 Vue.use(iview)
 

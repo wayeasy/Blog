@@ -69,6 +69,8 @@
 </template>
 <script>
 import { addCateApi, getCateListApi, deleteCateApi, getCateInfoByIdApi, updateCateByIdApi } from "@/api/artCate";
+// deleteArticleByCateApi
+import { deleteArticleByCateApi } from "@/api/article";
 import moment from "moment";
 import mixin from "@/mixin";
 export default {
@@ -275,10 +277,19 @@ export default {
         .then(res => {
           const data = res.data;
           if (data.status) {
-            this.$Notice.success({
-              title: "删除成功!"
-            });
-            this.getCateList(this.pageindex, this.pagesize);
+            deleteArticleByCateApi(params._id).then(res => {
+              const data = res.data
+              if (data.status) {
+                this.$Notice.success({
+                  title: "删除成功!"
+                });
+                this.getCateList(this.pageindex, this.pagesize);
+              } else {
+                this.$Notice.success({
+                  title: "删除失败!"
+                });
+              }
+            })    
           } else {
             this.$Notice.success({
               title: "删除失败!"

@@ -63,3 +63,26 @@ export const isRegisteApi = (username) => {
     }
   })
 }
+
+// 登录
+export const loginApi = (data) => {
+  return axios.request({
+    url: '/admin/login',
+    method: 'get',
+    params: data
+  })
+}
+
+// 判断用户是否登录
+export const isLoginApi = (data) => {
+  return axios.request({
+    url: '/admin/isLogin',
+    headers: {
+      user_token: data.user_token
+    },
+    method: 'get',
+    params: {
+      id: data.id
+    }
+  })
+}
